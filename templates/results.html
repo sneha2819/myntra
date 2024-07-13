@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+     <!-- FAVICON -->
+     <link rel="shortcut icon" type="image/png" href="static/newlogo-removebg-preview.png">
+    <!-- ALL CSS LINK -->
+    <link rel="stylesheet" href="static/style.css">
+    <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="static/navbar.css">
+    <link rel="stylesheet" href="static//header.css">
+    <!-- FONT-AWESOME -->
+    <script src="https://kit.fontawesome.com/72215895a8.js" crossorigin="anonymous"></script>
+    
+</head>
+<body>
+    <header>
+        <div id="logo">
+            <a href="/"></a><img src="static/newlogo-removebg-preview.png" alt="brandLogo" id="landingPage">
+        </div>
+        <div id="chat">
+            <i class="fa-solid fa-chart-simple"></i>
+            <a href="https://partyrock.aws/u/chatneha/K28u5YQjX/FashionForecast%3A-Envisioning-Fashion's-Future" target="_blank" class="chatbox"> trend predictor</a>
+        </div>
+        <div id="search">
+            <form action="/search" method="get">
+                <input type="text" name="query" id="search_bar" placeholder="Search for products">
+                <button type="submit">
+                    <i class="fa-solid fa-magnifying-glass" id="search_icon"></i>
+                </button>
+            </form>
+        </div>
+        
+        <div id = "res">
+    </header>
+
+    <main>
+        <h1>Search Results for "{{ query }}"</h1>
+        <a href="templates/index.html">Back to Home</a>
+        <div class="results">
+            {% for item in items.itertuples() %}
+                <div class="result-item">
+                    <img src="static/women_fashion/, filename='women_fashion/' + item.image" alt="{{item.description}}">
+                    <p>{{item.description}}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer>
+        <section id="section_1">
+            <div id="left">
+                <div>
+                    <h4>online shopping</h4>
+                    <p>men</p>
+                    <p>women</p>
+                    <p>home & living</p>
+                </div>
+                <div>
+                  <h4>useful links</h4>
+                  <p>men</p>
+                  <p>faq</p>
+                  <p>t&c</p>
+                  <p>terms of use</p>
+                  <p>track order</p>
+                  <p>shipping</p>
+                  <p>cancellation</p>
+                  <p>returns</p>
+                </div>
+    </footer>
+</body>
+</html>
+
