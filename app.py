@@ -1,25 +1,15 @@
-import os
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, request, render_template, send_from_directory, jsonify
 import pandas as pd
 from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import euclidean_distances
 
 app = Flask(__name__)
 
-# Load datasets
-try:
-    aesthetic_file_path = 'aesthetics_file.xlsx'
-    aesthetic_df = pd.read_excel("aesthetics_file.xlsx", sheet_name='Sheet1')
-except Exception as e:
-    print(f"Error loading aesthetics dataset: {e}")
-    aesthetic_df = pd.DataFrame()  # Default empty DataFrame
-
-try:
-    clothing_file_path = 'cleaned_clothing_file.csv'
-    clothing_df = pd.read_csv("cleaned_clothing_file.csv", encoding='ISO-8859-1')
-except Exception as e:
-    print(f"Error loading clothing dataset: {e}")
-    clothing_df = pd.DataFrame()  # Default empty DataFrame
+# Load the aesthetics and clothing datasets
+aesthetic_df = pd.read_excel('aesthetics_file.xlsx', sheet_name='Sheet1')
+clothing_df = pd.read_csv('cleaned_clothing_file.csv')
 
 # Ensure proper formatting of the 'features' column
 def preprocess_text(text):
@@ -47,34 +37,43 @@ if not aesthetic_df.empty:
 if not clothing_df.empty:
     clothing_embeddings = model.encode(clothing_df['features'].tolist())
 
-# Function to get items with minimum distance
+# Perform K-means clustering
+aesthetic_kmeans = KMeans(n_clusters=8, random_state=42)
+aesthetic_kmeans.fit(aesthetic_embeddings)
+clothing_kmeans = KMeans(n_clusters=8, random_state=42)
+clothing_kmeans.fit(clothing_embeddings)
+
 def get_items_with_min_distance(aesthetic):
-    if aesthetic not in clothing_df['features'].values:
-        print(f"Aesthetic '{aesthetic}' not found in the dataset.")
+    if aesthetic not in aesthetic_df['Aesthetic'].values:
         return pd.DataFrame(columns=['image', 'description'])
 
-    # Get the distances of all clothing items to the input aesthetic
-    clothing_distances = euclidean_distances(clothing_embeddings, clothing_embeddings[clothing_df['features'] == aesthetic].reshape(1, -1))
-
-    # Get the clothing items with the minimum distance to the input aesthetic
-    min_distance_indices = clothing_distances.flatten().argsort()[:10]  # Adjust number as needed
+    aesthetic_index = aesthetic_df.loc[aesthetic_df['Aesthetic'] == aesthetic].index[0]
+    clothing_distances = euclidean_distances(clothing_embeddings, aesthetic_embeddings[aesthetic_index].reshape(1, -1))
+    min_distance_indices = clothing_distances.flatten().argsort()[:10]
     items_with_min_distance = clothing_df.iloc[min_distance_indices]
-
     return items_with_min_distance
 
+# Define the Flask routes
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/results.html')
+def results_page():
+    return send_from_directory('templates', 'results.html')
+
 @app.route('/search', methods=['GET'])
 def search():
-    query = request.args.get('query', '').lower()
-    results = get_items_with_min_distance(query)
-    return render_template('results.html', query=query, items=results)
+    query = request.args.get('query')
+    if not query:
+        return render_template('results.html', items=[])
 
-@app.route('/women_fashion/<path:filename>')
-def women_fashion(filename):
-    return send_from_directory('women_fashion', filename)
+    query_embedding = model.encode([query])
+    distances = cosine_similarity(query_embedding, clothing_embeddings)
+    indices = distances.argsort()[0][-5:][::-1]
+
+    results = clothing_df.iloc[indices][['image', 'description']].to_dict(orient='records')
+    return render_template('results.html', items=results, query=query)
 
 if __name__ == '__main__':
     app.run(debug=True)
