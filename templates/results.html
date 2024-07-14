@@ -8,9 +8,10 @@
      <link rel="shortcut icon" type="image/png" href="static/newlogo-removebg-preview.png">
     <!-- ALL CSS LINK -->
     <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="static/productpage.css">
     <link href='https://unpkg.com/boxicons@2.1.2/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="static/navbar.css">
-    <link rel="stylesheet" href="static//header.css">
+    <link rel="stylesheet" href="static/header.css">
     <!-- FONT-AWESOME -->
     <script src="https://kit.fontawesome.com/72215895a8.js" crossorigin="anonymous"></script>
     
@@ -32,18 +33,36 @@
                 </button>
             </form>
         </div>
+        <div id="right_icon">
+            <div id="reggDropdown">
+                <!-- DROPDOWN MENU TO FOR LOGIN AND SIGNUP -->
+                <div id="drop">
+                    <a href="/Profile/profile.html" class="dropList">login</a>
+                    <a href="/Profile/signup.html" class="dropList">sign up</a>
+                </div>
+                <i class="fa-regular fa-user"></i>
+                <span>profile</span>
+            </div>
+            <div>
+                <i class="fa-regular fa-heart"></i>
+                <span>wishlist</span>
+            </div>
+            <div>
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>bag</span>
+            </div>
+        </div>
         
-        <div id = "res">
     </header>
 
     <main>
         <h1>Search Results for "{{ query }}"</h1>
-        <a href="templates/index.html">Back to Home</a>
+        <a href="/">Back to Home</a>
         <div class="results">
-            {% for item in items.itertuples() %}
+            {% for item in items %}
                 <div class="result-item">
-                    <img src="static/women_fashion/, filename='women_fashion/' + item.image" alt="{{item.description}}">
-                    <p>{{item.description}}</p>
+                    <img src="{{ url_for('static', filename=item['image']) }}" alt="{{ item['description'] }}">
+                    <p><strong>Description:</strong> {{ item.description }}</p>
                 </div>
             {% endfor %}
         </div>
@@ -70,6 +89,6 @@
                   <p>returns</p>
                 </div>
     </footer>
+    
 </body>
 </html>
-
